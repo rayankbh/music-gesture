@@ -3,15 +3,15 @@ import mediapipe as mp
 import pygame
 import os
 
-# Initialize MediaPipe Hands
+# mediapip init
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
-# Initialize Pygame mixer
+
 pygame.mixer.init()
 
-# Load chord sounds
+# chord sounds
 chord_sounds = {}
 chord_dir = "chords/CMaj"
 for chord_file in os.listdir(chord_dir):
@@ -20,7 +20,7 @@ for chord_file in os.listdir(chord_dir):
         chord_sound = pygame.mixer.Sound(os.path.join(chord_dir, chord_file))
         chord_sounds[chord_name] = chord_sound
 
-# Camera initialization
+# live camera
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Could not open video device")
