@@ -13,7 +13,7 @@ pygame.mixer.init()
 
 # chord sounds
 chord_sounds = {}
-chord_dir = "chords/CMaj"
+chord_dir = "music-gesture-inside/chords/CMaj"
 for chord_file in os.listdir(chord_dir):
     if chord_file.endswith(".mp3"):
         chord_name = chord_file[:-4]
@@ -26,13 +26,24 @@ if not cap.isOpened():
     print("Could not open video device")
     exit()
 
-def count_fingers(hand_landmarks):
+
+'''TO-DO: current the counting is only correct when the palms are facing towards users face (back of hand to camera)
+ this seems unnatural so need to find a fix for correct count with palms facing camera. '''
+ 
+def count_fingers(hand_landmarks, handedness):
     tips_ids = [4, 8, 12, 16, 20]
     fingers_up = [0, 0, 0, 0, 0]
 
+    # Check handedness and adjust thumb counting logic accordingly
+    is_left_hand = handedness.classification[0].label == 'Left'
+
     # Thumb
-    if hand_landmarks.landmark[tips_ids[0]].x > hand_landmarks.landmark[tips_ids[0] - 1].x:
-        fingers_up[0] = 1
+    if is_left_hand:
+        if hand_landmarks.landmark[tips_ids[0]].x < hand_landmarks.landmark[tips_ids[0] - 1].x:
+            fingers_up[0] = 1
+    else:
+        if hand_landmarks.landmark[tips_ids[0]].x > hand_landmarks.landmark[tips_ids[0] - 1].x:
+            fingers_up[0] = 1
 
     # Other fingers
     for id in range(1, 5):
@@ -62,9 +73,9 @@ def main():
         
         total_fingers = 0
         if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
+            for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                 mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-                total_fingers += count_fingers(hand_landmarks)
+                total_fingers += count_fingers(hand_landmarks, handedness)
         
         new_chord = get_chord(total_fingers)
         
