@@ -4,6 +4,7 @@ import cv2
 import mediapipe as mp
 import os
 import numpy as np
+import math 
 
 # Pygame Init
 pygame.init()
@@ -83,11 +84,26 @@ def draw_text(text, font, color, surface, x, y):
 
 
 '''
+Draws sine waves on the screen
+'''
+def draw_sine_waves(surface, time):
+    for i in range(5):
+        amplitude = 20 + i * 10
+        frequency = 0.01 + i * 0.01
+        for x in range(WIDTH):
+            y = int(HEIGHT / 2 + amplitude * math.sin(frequency * (x + time)))
+            surface.set_at((x, y), BLUE)
+
+'''
 Runs main menu
 '''
 def main_menu():
+    clock = pygame.time.Clock()
+    time = 0
+
     while True:
         screen.fill(BLACK)
+        draw_sine_waves(screen, time)
         draw_text('Chordzio', title_font, WHITE, screen, WIDTH//2 - 100, 100)
 
         mx, my = pygame.mouse.get_pos()
@@ -95,8 +111,16 @@ def main_menu():
         button_1 = pygame.Rect(WIDTH//2 - 100, 250, 200, 50)
         button_2 = pygame.Rect(WIDTH//2 - 100, 350, 200, 50)
 
-        pygame.draw.rect(screen, WHITE, button_1)
-        pygame.draw.rect(screen, WHITE, button_2)
+        # Button hover effect
+        if button_1.collidepoint((mx, my)):
+            pygame.draw.rect(screen, BLUE, button_1)
+        else:
+            pygame.draw.rect(screen, WHITE, button_1)
+
+        if button_2.collidepoint((mx, my)):
+            pygame.draw.rect(screen, BLUE, button_2)
+        else:
+            pygame.draw.rect(screen, WHITE, button_2)
 
         draw_text('Play', menu_font, BLACK, screen, WIDTH//2 - 30, 260)
         draw_text('Quit', menu_font, BLACK, screen, WIDTH//2 - 30, 360)
@@ -119,6 +143,9 @@ def main_menu():
                 sys.exit()
 
         pygame.display.update()
+        time += 1
+        clock.tick(60)
+
 
 
 '''
@@ -194,7 +221,7 @@ def game():
         frame = pygame.surfarray.make_surface(frame)
         
         screen.fill(BLACK)
-        
+
         screen.blit(frame, (x_offset, y_offset))
         
         pygame.display.flip()
