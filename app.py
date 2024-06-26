@@ -5,6 +5,7 @@ import mediapipe as mp
 import os
 import numpy as np
 import math 
+import random
 
 # Pygame Init
 pygame.init()
@@ -87,12 +88,41 @@ def draw_text(text, font, color, surface, x, y):
 Draws sine waves on the screen
 '''
 def draw_sine_waves(surface, time):
-    for i in range(5):
-        amplitude = 20 + i * 10
-        frequency = 0.01 + i * 0.01
-        for x in range(WIDTH):
-            y = int(HEIGHT / 2 + amplitude * math.sin(frequency * (x + time)))
-            surface.set_at((x, y), BLUE)
+    wave_colors = [
+        (0x00, 0x00, 0xFF, 200),    # #0000FF (Sine)
+        (0xF8, 0xF4, 0xE3, 200),    # #F8F4E3 (Cosine)
+        (0x5C, 0x5C, 0xFF, 180),    # #5C5CFF (Sine)
+        (0x00, 0x00, 0xFF, 220),    # #0000FF (Cosine)
+        (0xC2, 0xC2, 0xFF, 160),    # #C2C2FF (Sine)
+        (0x5C, 0x5C, 0xFF, 240),    # #5C5CFF (Cosine)
+        (0x49, 0x49, 0xF8, 220),    # #4949F8 (Sine)
+        (0x00, 0x00, 0xFF, 180),    # #0000FF (Cosine)
+        (0x56, 0x56, 0x84, 240)     # #565684 (Sine)
+    ]
+    
+    for i in range(len(wave_colors)):
+        amplitude = 15 + i * 8
+        frequency = 0.008 + i * 0.004
+        thickness = random.randint(2, 4)
+        
+        # scaling factor that changes slowly over time for animation
+        scale = 1 + 0.2 * math.sin(time * 0.001 + i)
+        wave_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+
+        # drawing wave as series of connected lines        
+        points = []
+        for x in range(0, WIDTH + 1, 2):
+            if i % 2 == 0:  #SINE 
+                y = int(HEIGHT / 2 + amplitude * scale * math.sin(frequency * (x + time * (1 + i * 0.1))))
+            else:  # COSINE
+                y = int(HEIGHT / 2 + amplitude * scale * math.cos(frequency * (x + time * (1 + i * 0.1))))
+            points.append((x, y))
+        
+        # anti-aliased lines for smoother appearance
+        pygame.draw.aalines(wave_surface, wave_colors[i], False, points, thickness)
+        
+        # Blit the wave surface onto the main surface
+        surface.blit(wave_surface, (0, 0))
 
 '''
 Runs main menu
